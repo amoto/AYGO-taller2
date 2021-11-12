@@ -1,58 +1,58 @@
+# Taller 2 AYGO
 
-# Welcome to your CDK Python project!
+En este taller se muestra una aplicación hecha con amazon CDK en el lenguaje python para desplegar la aplicación desarrollada en el [taller 1](https://github.com/amoto/AYGO-taller1) en 3 instancias de AWS EC2. 
 
-This is a blank project for Python development with CDK.
+## Requisitos
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+- [x] AWS cli
+- [X] Python 3
+- [X] NPM
+- [x] Cuenta de AWS
+- [x] AWS VPC
+- [x] AWS Security group
+- [x] AWS Key pair
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+## Configuración del entorno
 
-To manually create a virtualenv on MacOS and Linux:
+### Inicializar una aplicación para CDK
 
-```
-$ python3 -m venv .venv
-```
+- Instalar aws CDK `npm install -g aws-cdk`
+- Instalar pip `sudo apt-get install python3-pip`
+- Actualizar pip `python3 -m pip install --upgrade pip`
+- Instalar venv `sudo apt install python3.8-venv`
+- Actualizar venv `python3 -m pip install --upgrade virtualenv`
+- Inicializar la aplicación de cdk para python `cdk init app --language python`
+- Activar el venv de python3 `source .venv/bin/activate`
+- Instalar las dependencias necesarias `python -m pip install -r requirements.txt`
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
+### Desarrollo de la aplicación
 
-```
-$ source .venv/bin/activate
-```
+El archivo [taller2/taller2_stack.py](taller2/taller2_stack.py) contiene la definición del stack con el que se realizará el despliegue.
+Este stack está compuesto por el rol que poseerán las instancias, el security group al que pertenecerán (con los puertos 22, 80 y 8090 abiertos a internet) y la vpc en la que estarán ubicadas.
 
-If you are a Windows platform, you would activate the virtualenv like this:
+En las configuraciones de inicio de las instancias que se especifican en el stack se siguen los pasos esenciales definidos en la aplicación a desplegar, se instala git, docker, docker-compose, se clona el repositorio y se ejecuta docker-compose para iniciar los componentes necesarios. 
 
-```
-% .venv\Scripts\activate.bat
-```
+El archivo [app.py](app.py) es desde donde se instanciará el stack con las configuraciones que se van a usar las cuales serán:
 
-Once the virtualenv is activated, you can install the required dependencies.
+- key_name: El nombre de la pareja de llaves que se usará para conectarse a las instancias
+- vpc_id: El id de la VPC en la que se encontrarán las instancias cuando se creen
+- sg_id: El id del security group que cubrirá las instancias
+- account: El id de la cuenta de AWS 
+- region: La región en la que se crearán las instancias y donde se encuentran la VPC y el security group
 
-```
-$ pip install -r requirements.txt
-```
+## Despliegue del stack
 
-At this point you can now synthesize the CloudFormation template for this code.
+Para desplegar el stack se ejecuta el comando `cdk deploy` desde el ambiente virtual de python3.
+![cdk deploy](images/cdk_deploy.png)
 
-```
-$ cdk synth
-```
+Luego desde la consola de administración de aws es posible ver las 3 instancias creadas.
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+![instances](images/instances.png)
 
-## Useful commands
+Al entrar a una de estas instancias y ejecutar el comando `docker ps` se puede observar que los contenedores de [taller 1](https://github.com/amoto/AYGO-taller1) se encuentran en ejecución.
 
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+![docker ps](images/docker_ps.png)
 
-Enjoy!
+Desde el DNS público de una de las instancias accediendo por el protocolo http y por el puerto 80 desde un explorador web se puede ver la aplicación en ejecución.
+
+![web ui](images/web_ui.png)
